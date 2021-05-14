@@ -20,7 +20,7 @@ def to_d3_json(m_dict):
         d3_json['links'].append({"source": pair[0], "target": pair[1], "value": count})
 
     with open('messages_counts.json', 'w') as outfile:
-        json.dump(d3_json, outfile)
+        json.dump(d3_json, outfile, default=str)
     return None
 
 
@@ -72,7 +72,7 @@ def scan_for_replies(m_dict, is_reply_args):
                         neg += 1
                 m_replies[cur['id']]['reply_to_user'] = prev['from']
             m += 1
-    print(f'{c} sec;{s} spm;{sd*100}%; {m} replies; {pos}; {neg}')
+    print(f'{c} sec\t{s} spm\t{sd*100}%\t {m} replies\t{pos}/{neg} hit/miss')
     return m_replies
 
 
@@ -80,10 +80,12 @@ def main():
     messages_dict = pickle.load(open("messages_dict.pickle", "rb"))
 
     # Тестируем лучшую комбинацию параметров
-    for c in [5, 10, 15, 20]:
-        for s in [150, 160, 170, 180, 190, 200]:
-            for sd in [0.1, 0.15, 0.2, 0.25, 0.3, 0.35]:
-                scan_for_replies(messages_dict['messages'], [c, s, sd])
+    # 5 sec	170 spm	35.0%	 160 replies	49/0 hit/miss - лучшая?
+    # for c in [5, 10, 15, 20]:
+    #     for s in [150, 160, 170, 180, 190, 200]:
+    #         for sd in [0.1, 0.15, 0.2, 0.25, 0.3, 0.35]:
+    #             scan_for_replies(messages_dict['messages'], [c, s, sd])
+    messages_dict['messages'] = scan_for_replies(messages_dict['messages'], [5, 170, 0.35])
     to_d3_json(messages_dict)
 
 
